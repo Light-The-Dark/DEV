@@ -2,8 +2,8 @@ import datetime as dt
 import random
 import smtplib
 
-DUMMY_EMAIL = "j20620337@gmail.com"
-PASSWORD = "xqes yver yedc czll"
+DUMMY_EMAIL = 
+PASSWORD = 
 
 with open(r"C:\Users\alazarix\Files\Day-31\quotes.txt", mode="r") as quotes:
     random_quote = random.choice(quotes.readlines())
