@@ -39,21 +39,6 @@ table2 = Table('WH_Data', metadata,
                   )
 
 
-db = mysql.connector.connect(
-    host = "localhost",
-    user = "root",
-    password = "root",
-    database = "new_schema",
-)
-
-cursor = db.cursor()
-
-cursor.execute("SELECT * From Person")
-
-for x in cursor:
-    print(x)
-
-
 
 metadata.create_all(engine)
 with engine.connect() as connection:
