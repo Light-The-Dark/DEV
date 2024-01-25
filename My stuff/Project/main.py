@@ -1,5 +1,5 @@
-## TODO 1: Get SN of current device 2: Create table for each device 3: Append the data from the files to the DB
-
+## TODO A 1: Get SN of current device 2: Create table for each device 3: Append the data from the files to the DB
+## TODO B 1: API calls 2: Users with permissions
 
 import pandas
 import os
@@ -7,7 +7,7 @@ import mysql.connector
 
 directory = r"C:\Users\alazarix\Files\Project"
 # Loops through html files to get data
-column_names = ["Feature_Title", "Enabled", "Feature_Description", "Part_Number"]
+# column_names = ["Feature_Title", "Enabled", "Feature_Description", "Part_Number"]
 
 for fn in os.listdir(directory):
     file_path = os.path.join(directory, fn)
@@ -18,7 +18,9 @@ for fn in os.listdir(directory):
 
 
 # columns = list(html_list)
-print(columns)
+print(html_content[0][2])
+
+
 
 db = mysql.connector.connect(
     host = "localhost",
@@ -28,5 +30,9 @@ db = mysql.connector.connect(
 )
 
 cursor = db.cursor()
+# cursor.execute("INSERT INTO Person (name, age) VALUES (%s, %s)", ("Tim", 20))
+for i in range(0,len(html_content)):
+    cursor.execute("INSERT INTO wh_data (enabled) VALUES (%s)", (html_content[i][1]))
 
-cursor.execute()
+
+
