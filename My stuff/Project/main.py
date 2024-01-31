@@ -5,23 +5,6 @@ import pandas
 import os
 import mysql.connector
 
-directory = r"C:\Users\alazarix\Files\Project"
-# Loops through html files to get data
-# column_names = ["Feature_Title", "Enabled", "Feature_Description", "Part_Number"]
-
-for fn in os.listdir(directory):
-    file_path = os.path.join(directory, fn)
-    with open(file_path) as f:
-        html_content = pandas.read_html(f)[0]
-        columns = list(html_content.columns)
-        html_content = html_content.to_dict(orient="records")
-
-
-# columns = list(html_list)
-print(html_content[0][2])
-
-
-
 db = mysql.connector.connect(
     host = "localhost",
     user = "root",
@@ -29,10 +12,32 @@ db = mysql.connector.connect(
     database = "new_schema",
 )
 
+directory = r"C:\Users\alazarix\Files\Project"
+# Loops through html files to get data
+# column_names = ["Feature_Title", "Enabled", "Feature_Description", "Part_Number"]
+
 cursor = db.cursor()
+query = "INSERT INTO wh_data (enabled) VALUES (%s)"
+
+for fn in os.listdir(directory):
+    file_path = os.path.join(directory, fn)
+    with open(file_path) as f:
+        html_content = pandas.read_html(f)[0]
+        columns = list(html_content.columns)
+        html_content = html_content.to_dict(orient="records")
+        print(html_content[9][1])
+    for i in range(len(html_content)):
+        cursor.execute(query,(html_content[i][1],))
+        
+# columns = list(html_list)
+# print(html_content[0][2])
+
+
+
+
+
 # cursor.execute("INSERT INTO Person (name, age) VALUES (%s, %s)", ("Tim", 20))
-for i in range(0,len(html_content)):
-    cursor.execute("INSERT INTO wh_data (enabled) VALUES (%s)", (html_content[i][1]))
+
 
 
 
