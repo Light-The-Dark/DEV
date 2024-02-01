@@ -33,3 +33,8 @@ rows = cursor.fetchall()
 # Print the retrieved data
 for row in rows:
     print(row)
+
+
+# Modifying stuff in table
+    
+cursor.execute("ALTER TABLE wh_data")

@@ -8,4 +8,13 @@ db = mysql.connector.connect(
     database = "new_schema",
 )
 
+cursor = db.cursor()
 
+cursor.execute("SELECT * FROM wh_data WHERE sn = 21496")
+
+# Fetch all the rows
+rows = cursor.fetchall()
+
+# Print the retrieved data
+for row in rows:
+    print(row)

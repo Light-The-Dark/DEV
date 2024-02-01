@@ -11,12 +11,11 @@ db = mysql.connector.connect(
     database = "new_schema",
 )
 
-directory = r"C:\Users\alazarix\Files\Project"
-# Loops through html files to get data
-# column_names = ["Feature_Title", "Enabled", "Feature_Description", "Part_Number"]
-
 cursor = db.cursor()
+cursor.execute("CREATE TABLE wh_data (ID int PRIMARY KEY AUTO_INCREMENT, Feature_Title VARCHAR(255), Enabled VARCHAR(20), Feature_Description VARCHAR(255), Part_Number VARCHAR(255), SN int)")
 
+# Loops through HTML and adds to db
+directory = r"C:\Users\alazarix\Files\Project"
 for fn in os.listdir(directory):
     file_path = os.path.join(directory, fn)
     with open(file_path, "r") as f:
