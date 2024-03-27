@@ -1,0 +1,16 @@
+<html>
+    <head>
+        <title>
+
+        </title>
+    </head>
+    <body>
+        <h1>Home Page</h1>
+        {% for post in posts %}
+        {{ post.author }}
+        {{ post.post }}
+        {{ post.date }}
+
+        {% endfor %}
+    </body>
+</html>
