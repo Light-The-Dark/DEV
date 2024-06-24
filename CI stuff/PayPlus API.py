@@ -1,17 +1,16 @@
-from urllib.request import Request, urlopen
-import urllib
+import requests
 import json
 
 # These are fake values for testing
 values = """
 {
-"customer_name": "Moshe cohen",
-"email": "moshe@example.com",
+"customer_name": "TEST",
+"email": "aharon@example.com",
 "paying_vat": true,
 "vat_number": 123456789,
 "customer_number": 145789,
 "notes": "",
-"phone": "039666666",
+"phone": "0583205418",
 "contacts": [
     {
         "full_name": "Moshe cohen",
@@ -25,54 +24,71 @@ values = """
     }
 ],
 "business_address": "Haim Weizman 12",
-"business_city": "Holon",
+"business_city": "Jerusalem",
 "business_postal_code": "432765",
-"business_country_iso": "IL",
-}"""
+"business_country_iso": "IL"
+}
+"""
 
-
-with open (r"CI stuff\api.txt", "r") as file:
+with open("CI stuff/api.txt") as file:
     api = file.readline()
-    api_keys = api.strip()
-    print(api_keys)
+
+with open("CI stuff/secret_key.txt") as file:
+    secret = file.readline()
+
 
 headers = {
-"Content-Type": "application/json",
-"Authorization": api_keys
+  'Content-Type': 'application/json',
+  'Authorization': f'{{"api_key":"{api}","secret_key":"{secret}"}}'
 }
 
-print(headers)
 
-
-data = values.encode("utf-8")
-
-def response(request):
+def request_change(url, data=None):
     try:
-        with urlopen(request) as response:
-            response_body = response.read()
-            print(response_body.decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        print('HTTP Error:', e.code, e.reason)
-    except urllib.error.URLError as e:
-        print('URL Error:', e.reason)
+        response = requests.post(url, headers=headers, data=data)
+        response.raise_for_status()  
+        print(response.text)
+    except requests.exceptions.HTTPError as e:
+        print('HTTP Error:', e.response.status_code, e.response.reason)
+    except requests.exceptions.RequestException as e:
+        print('Request Exception:', e)
 
-def add_customer(data):
-    return Request('https://private-anon-3bb9e7ceb2-payplus.apiary-mock.com/api/v1.0/Customers/Add', data=data, headers=headers)
-
-def update_customer(data):
-    return Request('https://private-anon-3bb9e7ceb2-payplus.apiary-mock.com/api/v1.0/Customers/Update/:{uid}', data=data, headers=headers)
-
-def view_customer(data):
-    return Request('https://private-anon-3bb9e7ceb2-payplus.apiary-mock.com/api/v1.0/Customers/View?uuid={uuid}&vat_number={vat_number}&email={email}&skip={skip}&take={take} ', headers=headers)
-
-def remove_customer(data):
-    return Request('https://private-anon-3bb9e7ceb2-payplus.apiary-mock.com/api/v1.0/Customers/Remove/:{customer_uid}', data=data, headers=headers)
-
+def request_data(url):
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  
+        print(response.text)
+        return response.text
+    except requests.exceptions.HTTPError as e:
+        print('HTTP Error:', e.response.status_code, e.response.reason)
+    except requests.exceptions.RequestException as e:
+        print('Request Exception:', e)
 
 
+def add_customer():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Customers/Add"
+    request_change(url)
 
-request = remove_customer(data)
-response(request)
+def update_customer():
+    uid = "3aae0fb9-a3ea-409c-bd2f-2295fbe6a890"
+    url = "https://restapidev.payplus.co.il/api/v1.0/Customers/Update/" + uid
+    request_change(url)
+
+def view_customer():
+    param = "email=aharon@example.com"
+    url = "https://restapidev.payplus.co.il/api/v1.0/Customers/View?" + param
+    dict =  json.request_data(url)
+    print(dict["customer_uid"])
+
+def remove_customer(uid):
+    url = f"https://restapidev.payplus.co.il/api/v1.0/Customers/Remove/{uid}"
+    request_change(url)
 
 
 
+
+# add_customer()
+uid = view_customer()
+# update_customer()
+# remove_customer()
+# response(request_url)
