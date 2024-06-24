@@ -48,6 +48,7 @@ def request_change(url, data=None):
         response = requests.post(url, headers=headers, data=data)
         response.raise_for_status()  
         print(response.text)
+        return response.json()
     except requests.exceptions.HTTPError as e:
         print('HTTP Error:', e.response.status_code, e.response.reason)
     except requests.exceptions.RequestException as e:
@@ -58,28 +59,37 @@ def request_data(url):
         response = requests.get(url, headers=headers)
         response.raise_for_status()  
         print(response.text)
-        return response.text
+        return response.json()
     except requests.exceptions.HTTPError as e:
         print('HTTP Error:', e.response.status_code, e.response.reason)
     except requests.exceptions.RequestException as e:
         print('Request Exception:', e)
 
 
+#################################################################################
+
+
 def add_customer():
     url = "https://restapidev.payplus.co.il/api/v1.0/Customers/Add"
     request_change(url)
 
-def update_customer():
-    uid = "3aae0fb9-a3ea-409c-bd2f-2295fbe6a890"
+def update_customer(uid):
     url = "https://restapidev.payplus.co.il/api/v1.0/Customers/Update/" + uid
     request_change(url)
 
+# 
 def view_customer():
+    # Parameters are: email, vat_number, uuid
     param = "email=aharon@example.com"
     url = "https://restapidev.payplus.co.il/api/v1.0/Customers/View?" + param
-    dict =  json.request_data(url)
-    print(dict["customer_uid"])
-
+    data = request_data(url)
+    customer_uids = [customer['customer_uid'] for customer in data['customers']]
+    print(customer_uids)
+    try:
+        return str(customer_uids[0])
+    except:
+        print("No customer found")
+    
 def remove_customer(uid):
     url = f"https://restapidev.payplus.co.il/api/v1.0/Customers/Remove/{uid}"
     request_change(url)
@@ -88,7 +98,7 @@ def remove_customer(uid):
 
 
 # add_customer()
-uid = view_customer()
+# uid = view_customer()
 # update_customer()
-# remove_customer()
+# remove_customer(uid)
 # response(request_url)
