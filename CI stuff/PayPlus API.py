@@ -30,6 +30,9 @@ values = """
 }
 """
 
+with open("CI stuff/bank_info.json") as file:
+    bank_values = file.read()
+
 with open("CI stuff/api.txt") as file:
     api = file.readline()
 
@@ -115,12 +118,42 @@ def remove_customer(uid):
 
 
 # add_customer(values)
-# uid = view_customer(email="aharon@example.com")
+uid = view_customer(email="aharon@example.com")
 # update_customer(uid, values)
 # view_customer()
 # remove_customer(uid)
 
+####################################################################################
+# Bank functions
+####################################################################################
+# This replaces the blank uid with a real uid
+bank_values = bank_values.replace("{uid}", uid)
 
 
-##############################################################################################################
+# NOTE!!!!! User ID needs to be in data, not in the url
+def add_bank(bank_info):
+    url = "https://restapidev.payplus.co.il/api/v1.0/Banks/CreateCustomerBankAccount"
+    request_change(url, data=bank_info)
+
+def update_bank_info(user_id):
+    url = "https://restapidev.payplus.co.il/api/v1.0/Banks/UpdateCustomerBankAccount/" + user_id
+    request_change(url, data=bank_values)
+
+def view_bank_details(user_id):
+    url = "https://restapidev.payplus.co.il/api/v1.0/Banks/CustomerBankAccounts/" + user_id
+    data = request_data(url)
+    try:
+        return data["data"][0]["uid"]
+    except:
+        print("No bank details available")
+
+def remove_bank_account(user_id):
+    url = "https://restapidev.payplus.co.il/api/v1.0/Banks/RemoveCustomerBankAccount/" + user_id
+    request_change(url)
+
+
+# add_bank(bank_values)
+# update_bank_info(uid)
+bank_uid = view_bank_details(uid)
+# remove_bank_account(bank_uid)
 
