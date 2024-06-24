@@ -45,6 +45,9 @@ headers = {
   'Authorization': f'{{"api_key":"{api}","secret_key":"{secret}"}}'
 }
 
+####################################################################################
+# Handle responses, both to push changes and to request data
+####################################################################################
 
 def request_change(url, data=None):
     try:
@@ -69,7 +72,9 @@ def request_data(url):
         print('Request Exception:', e)
 
 
-#################################################################################
+####################################################################################
+# Adding/manipluating customers functions
+####################################################################################
 
 
 def add_customer(info):
@@ -123,6 +128,8 @@ uid = view_customer(email="aharon@example.com")
 # view_customer()
 # remove_customer(uid)
 
+
+
 ####################################################################################
 # Bank functions
 ####################################################################################
@@ -147,6 +154,7 @@ def view_bank_details(user_id):
     except:
         print("No bank details available")
 
+# NOTE: user_id here refers to the special id of the bank not the original user id
 def remove_bank_account(user_id):
     url = "https://restapidev.payplus.co.il/api/v1.0/Banks/RemoveCustomerBankAccount/" + user_id
     request_change(url)
@@ -154,6 +162,11 @@ def remove_bank_account(user_id):
 
 # add_bank(bank_values)
 # update_bank_info(uid)
-bank_uid = view_bank_details(uid)
+# bank_uid = view_bank_details(uid)
 # remove_bank_account(bank_uid)
+
+####################################################################################
+# Recurring transactions
+####################################################################################
+
 
