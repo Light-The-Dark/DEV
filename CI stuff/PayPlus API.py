@@ -69,22 +69,39 @@ def request_data(url):
 #################################################################################
 
 
-def add_customer():
+def add_customer(info):
     url = "https://restapidev.payplus.co.il/api/v1.0/Customers/Add"
-    request_change(url)
+    request_change(url, data=info)
 
-def update_customer(uid):
+def update_customer(uid, values):
     url = "https://restapidev.payplus.co.il/api/v1.0/Customers/Update/" + uid
-    request_change(url)
+    request_change(url, data=values)
 
-# 
-def view_customer():
-    # Parameters are: email, vat_number, uuid
-    param = "email=aharon@example.com"
-    url = "https://restapidev.payplus.co.il/api/v1.0/Customers/View?" + param
+def view_customer(email=None, vat_number=None, user_id=None):
+    # Base URL
+    base_url = "https://restapidev.payplus.co.il/api/v1.0/Customers/View?"
+
+    # Initialize an empty list to collect parameters
+    params = []
+
+    # Add email if provided
+    if email:
+        params.append(f"email={email}")
+
+    # Add vat_number if provided (and not None)
+    if vat_number is not None:
+        params.append(f"vat_number={vat_number}")
+
+    # Add user_id if provided
+    if user_id:
+        params.append(f"user_id={user_id}")
+
+    # Join all parameters with "&" and concatenate to the base URL
+    url = base_url + "&".join(params)
     data = request_data(url)
+
+
     customer_uids = [customer['customer_uid'] for customer in data['customers']]
-    print(customer_uids)
     try:
         return str(customer_uids[0])
     except:
@@ -97,8 +114,13 @@ def remove_customer(uid):
 
 
 
-# add_customer()
-# uid = view_customer()
-# update_customer()
+# add_customer(values)
+# uid = view_customer(email="aharon@example.com")
+# update_customer(uid, values)
+# view_customer()
 # remove_customer(uid)
-# response(request_url)
+
+
+
+##############################################################################################################
+
