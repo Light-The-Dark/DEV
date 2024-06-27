@@ -33,11 +33,19 @@ values = """
 with open("CI stuff/bank_info.json") as file:
     bank_values = file.read()
 
+with open("CI stuff/charges_values.json", encoding="utf-8") as file:
+    charges_values = file.read()
+
+# NOTE terminal uid is hardcoded currently in data file
+with open("CI stuff/token.json", encoding="utf-8") as file:
+    token = file.read()
+
 with open("CI stuff/api.txt") as file:
     api = file.readline()
 
 with open("CI stuff/secret_key.txt") as file:
     secret = file.readline()
+
 
 
 headers = {
@@ -60,9 +68,9 @@ def request_change(url, data=None):
     except requests.exceptions.RequestException as e:
         print('Request Exception:', e)
 
-def request_data(url):
+def request_data(url, data=None):
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, data=data)
         response.raise_for_status()  
         print(response.text)
         return response.json()
@@ -75,7 +83,6 @@ def request_data(url):
 ####################################################################################
 # Adding/manipluating customers functions
 ####################################################################################
-
 
 def add_customer(info):
     url = "https://restapidev.payplus.co.il/api/v1.0/Customers/Add"
@@ -133,7 +140,7 @@ uid = view_customer(email="aharon@example.com")
 ####################################################################################
 # Bank functions
 ####################################################################################
-# This replaces the blank uid with a real uid
+# This replaces the blank uid in "bank_values" with a real uid
 bank_values = bank_values.replace("{uid}", uid)
 
 
@@ -166,7 +173,62 @@ def remove_bank_account(user_id):
 # remove_bank_account(bank_uid)
 
 ####################################################################################
+# Tokens == CC info
+####################################################################################
+# NOTE: Need to change token data per user. Required info: terminal uid, customer uid, cc info
+token = token.replace("{uid}", uid)
+token_parse = json.loads(token)
+terminal_uid = token_parse["terminal_uid"]
+
+data2 = f"""
+    {{
+    "terminal_uid": {terminal_uid},
+    "customer_uid": "415314fd-88ed-4e0a-b35b-3d9ba68092060218"
+    }}
+    """
+
+def add_cc():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Token/Add"
+    request_change(url, data=token)
+
+def remove_cc():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Token/Remove/" + card_id
+    print(url)
+    request_change(url)
+
+def check_cc():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Token/Check/" + card_id
+    request_data(url)
+
+def view_cc():
+    # Getting permission to decrpyt denied error
+    url = "https://restapidev.payplus.co.il/api/v1.0/Token/View/" + card_id
+    request_data(url)
+
+def list():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Token/List/"
+    # Needs customer uid and terminal uid
+    print(url, data2)
+    request_data(url, data2)
+    
+    
+# add_cc()
+# remove_cc()
+# check_cc()
+# view_cc()
+# list()
+
+####################################################################################
 # Recurring transactions
 ####################################################################################
+# NOTE: Requires products with categories first!!! Also tokens!!!
+# NOTE: Terminal uid needs to be replaced with real number
 
+charges_values = charges_values.replace("{uid}", uid)
+# print(charges_values)
 
+def add_recurring_payment():
+    url = "https://restapidev.payplus.co.il/api/v1.0/RecurringPayments/Add"
+    request_change(url, data=charges_values)
+
+# add_recurring_payment()
