@@ -1,3 +1,6 @@
+# TODO in PHP. Add customer info to DB and then add whatever relevant info ie. cc info
+# TODO Make sure that all file formats are uniform. Right now, loading files as string and JSON.
+
 import requests
 import json
 
@@ -30,15 +33,18 @@ values = """
 }
 """
 
+with open("CI stuff/customer_info.json") as file:
+    customer_info_local = json.load(file)
+
 with open("CI stuff/bank_info.json") as file:
     bank_values = file.read()
 
-with open("CI stuff/charges_values.json", encoding="utf-8") as file:
+with open("CI stuff/charges_values.json") as file:
     charges_values = file.read()
 
 # NOTE terminal uid is hardcoded currently in data file
-with open("CI stuff/token.json", encoding="utf-8") as file:
-    token = file.read()
+with open("CI stuff/cc_token.json", encoding="utf-8") as file:
+    cc_token = file.read()
 
 with open("CI stuff/api.txt") as file:
     api = file.readline()
@@ -93,32 +99,29 @@ def update_customer(uid, values):
     request_change(url, data=values)
 
 def view_customer(email=None, vat_number=None, user_id=None):
-    # Base URL
+    # Views customer based on filters
     base_url = "https://restapidev.payplus.co.il/api/v1.0/Customers/View?"
-
-    # Initialize an empty list to collect parameters
     params = []
 
-    # Add email if provided
     if email:
         params.append(f"email={email}")
 
-    # Add vat_number if provided (and not None)
     if vat_number is not None:
         params.append(f"vat_number={vat_number}")
 
-    # Add user_id if provided
     if user_id:
         params.append(f"user_id={user_id}")
 
-    # Join all parameters with "&" and concatenate to the base URL
     url = base_url + "&".join(params)
     data = request_data(url)
 
-
     customer_uids = [customer['customer_uid'] for customer in data['customers']]
+
+    # TODO return all info as filtered and then let user choose what to pick.
+    # Currently this will return only the first customer as a str assuming that multiple customers have matching info in the query ie. same email.
+    # Also, need to only return one variable instead of 2 but will leave for testing in the meantime
     try:
-        return str(customer_uids[0])
+        return str(customer_uids[0]), data["customers"][0]
     except:
         print("No customer found")
     
@@ -130,16 +133,16 @@ def remove_customer(uid):
 
 
 # add_customer(values)
-uid = view_customer(email="aharon@example.com")
+uid, customer_info_payplus = view_customer(email="aharon@example.com")
 # update_customer(uid, values)
 # view_customer()
 # remove_customer(uid)
 
-
-
 ####################################################################################
 # Bank functions
 ####################################################################################
+### TEST AGAGIN TO MAKE SURE IT WORKS!!!!!
+
 # This replaces the blank uid in "bank_values" with a real uid
 bank_values = bank_values.replace("{uid}", uid)
 
@@ -175,23 +178,33 @@ def remove_bank_account(user_id):
 ####################################################################################
 # Tokens == CC info
 ####################################################################################
-# NOTE: Need to change token data per user. Required info: terminal uid, customer uid, cc info
-token = token.replace("{uid}", uid)
-token_parse = json.loads(token)
-terminal_uid = token_parse["terminal_uid"]
+# NOTE: Need to change cc_token data per user/per card. Required info: terminal uid, customer uid, cc info
+
+# Question. Do we save last 4 digits or whole card?
+# Create a new json with cards attached to customer_uid ie {cards: {uid: "123". card: "456"} {uid: "321", card: "654"}}
+
+cc_token = cc_token.replace("{uid}", uid)
+cc_token_parse = json.loads(cc_token)
+terminal_uid = cc_token_parse["terminal_uid"]
 
 data2 = f"""
     {{
     "terminal_uid": {terminal_uid},
-    "customer_uid": "415314fd-88ed-4e0a-b35b-3d9ba68092060218"
+    "customer_uid": {uid}
     }}
     """
 
 def add_cc():
     url = "https://restapidev.payplus.co.il/api/v1.0/Token/Add"
-    request_change(url, data=token)
+    data = request_change(url, data=cc_token)
+    if data["results"]["status"] == "success":
+        add_cc_info(data["data"]["card_uid"])
+        # Returns just the cc_id
+        return data["data"]["card_uid"]
+    else:
+        print(data["results"])
 
-def remove_cc():
+def remove_cc(card_id):
     url = "https://restapidev.payplus.co.il/api/v1.0/Token/Remove/" + card_id
     print(url)
     request_change(url)
@@ -211,12 +224,35 @@ def list():
     print(url, data2)
     request_data(url, data2)
     
-    
-# add_cc()
+def add_cc_info(card_id):
+    if "card_id" not in customer_info_local:
+        print("If statement")
+        customer_info_local["card_id"] = card_id
+        with open("CI stuff/customer_info.json", "w") as file:
+            json.dump(customer_info_local, file, indent=4)
+    else:
+        print("else statement")
+        i = 1
+        while f"card_id_{i}" in customer_info_local:
+            i += 1
+        customer_info_local[f"card_id_{i}"] = card_id
+       
+        with open("CI stuff/customer_info.json", "w") as file:
+            json.dump(customer_info_local, file, indent=4)
+
+
+add_cc()
 # remove_cc()
 # check_cc()
 # view_cc()
 # list()
+# add_cc_info()
+
+
+print("########################################################################")
+# for key in customer_info_local:
+#     print(key)
+# print(customer_info)
 
 ####################################################################################
 # Recurring transactions
