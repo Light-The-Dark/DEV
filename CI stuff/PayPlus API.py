@@ -194,6 +194,7 @@ data2 = f"""
     }}
     """
 
+
 def add_cc():
     url = "https://restapidev.payplus.co.il/api/v1.0/Token/Add"
     data = request_change(url, data=cc_token)
@@ -204,26 +205,6 @@ def add_cc():
     else:
         print(data["results"])
 
-def remove_cc(card_id):
-    url = "https://restapidev.payplus.co.il/api/v1.0/Token/Remove/" + card_id
-    print(url)
-    request_change(url)
-
-def check_cc():
-    url = "https://restapidev.payplus.co.il/api/v1.0/Token/Check/" + card_id
-    request_data(url)
-
-def view_cc():
-    # Getting permission to decrpyt denied error
-    url = "https://restapidev.payplus.co.il/api/v1.0/Token/View/" + card_id
-    request_data(url)
-
-def list():
-    url = "https://restapidev.payplus.co.il/api/v1.0/Token/List/"
-    # Needs customer uid and terminal uid
-    print(url, data2)
-    request_data(url, data2)
-    
 def add_cc_info(card_id):
     if "card_id" not in customer_info_local:
         print("If statement")
@@ -240,11 +221,33 @@ def add_cc_info(card_id):
         with open("CI stuff/customer_info.json", "w") as file:
             json.dump(customer_info_local, file, indent=4)
 
+def remove_cc(card_id):
+    url = "https://restapidev.payplus.co.il/api/v1.0/Token/Remove/" + card_id
+    print(url)
+    request_change(url)
 
-add_cc()
+def check_cc(card_id):
+    url = "https://restapidev.payplus.co.il/api/v1.0/Token/Check/" + card_id
+    request_data(url)
+
+# Getting permission to decrpyt denied error. Don't think it's relevant anyways since we only need last 4 digits
+# def view_cc(card_id):
+#     
+#     url = "https://restapidev.payplus.co.il/api/v1.0/Token/View/" + card_id
+#     request_data(url)
+
+def list():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Token/List/"
+    # Needs customer uid and terminal uid
+    # print(url, data2)
+    request_data(url, data2)
+    
+
+# add_cc()
 # remove_cc()
-# check_cc()
-# view_cc()
+# check_cc(card_id)
+
+# view_cc(card_id)
 # list()
 # add_cc_info()
 
