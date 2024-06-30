@@ -304,14 +304,27 @@ def view_product():
 ####################################################################################
 # Recurring transactions
 ####################################################################################
-# NOTE: Requires products with categories first!!!
-# NOTE: Terminal uid needs to be replaced with real number
+# NOTE: Need to save recurring payment id, deleting any hard coded id even though it makes no dif since its all sandbox
 
 charges_values = charges_values.replace("{uid}", uid)
-print(charges_values)
+recurring_payment_id = ""
+
+terminal_uid2 = """
+{
+    "terminal_uid": "{uid}"
+}
+"""
+terminal_uid2 = terminal_uid2.replace("{uid}", terminal_uid)
+
 
 def add_recurring_payment():
     url = "https://restapidev.payplus.co.il/api/v1.0/RecurringPayments/Add"
     request_change(url, data=charges_values)
 
-add_recurring_payment()
+def remove_recurring_payment():
+    url = "https://restapidev.payplus.co.il/api/v1.0/RecurringPayments/DeleteRecurring/" + recurring_payment_id
+    request_change(url, data=terminal_uid2)
+
+
+# add_recurring_payment()
+# remove_recurring_payment()
