@@ -251,16 +251,67 @@ def list():
 # add_cc_info()
 
 ####################################################################################
+# Product Categories
+####################################################################################
+# NOTE: I didn't save the product categories local since I'm just trying to get the recurring payment to work
+
+product_category_values = """
+{
+    "name": "Appliances",
+    "valid": true
+}
+"""
+
+def create_product():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Categories/Add"
+    request_change(url, data=product_category_values)
+
+def view_product():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Categories/View/?" + "5d6d68a6-b3ae-4c48-bae4-0611220e7768"
+    request_data(url)
+
+# create_product()
+# view_product()
+
+####################################################################################
+# Products
+####################################################################################
+# NOTE: Same not as above. Hard coding category id temporarily
+
+product_values = """
+{
+  "category_uid": "5d6d68a6-b3ae-4c48-bae4-0611220e7768",
+  "name": "TV",
+  "price": 1500.50,
+  "currency_code": "ILS",
+  "vat_type": 0
+}
+"""
+
+
+def add_product():
+    # Requires category id, name, price, currency code (ie USD), vat type 0-'vat included' OR 1-'vat not included' OR 2- 'exempt vat'
+    url = "https://restapidev.payplus.co.il/api/v1.0/Products/Add"
+    request_change(url, data=product_values)
+
+def view_product():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Products/View/" + "?uid/2694911e-9d22-4a33-b720-00c048c1b006"
+    request_data(url)
+
+# add_product()
+# view_product()
+
+####################################################################################
 # Recurring transactions
 ####################################################################################
-# NOTE: Requires products with categories first!!! Also tokens!!!
+# NOTE: Requires products with categories first!!!
 # NOTE: Terminal uid needs to be replaced with real number
 
 charges_values = charges_values.replace("{uid}", uid)
-# print(charges_values)
+print(charges_values)
 
 def add_recurring_payment():
     url = "https://restapidev.payplus.co.il/api/v1.0/RecurringPayments/Add"
     request_change(url, data=charges_values)
 
-# add_recurring_payment()
+add_recurring_payment()
