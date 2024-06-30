@@ -33,23 +33,23 @@ values = """
 }
 """
 
-with open("CI stuff/customer_info.json") as file:
+with open("CI stuff/Payplus API functions/customer_info.json") as file:
     customer_info_local = json.load(file)
 
-with open("CI stuff/bank_info.json") as file:
+with open("CI stuff/Payplus API functions/bank_info.json") as file:
     bank_values = file.read()
 
-with open("CI stuff/charges_values.json") as file:
+with open("CI stuff/Payplus API functions/charges_values.json") as file:
     charges_values = file.read()
 
 # NOTE terminal uid is hardcoded currently in data file
-with open("CI stuff/cc_token.json", encoding="utf-8") as file:
+with open("CI stuff/Payplus API functions/cc_token.json", encoding="utf-8") as file:
     cc_token = file.read()
 
-with open("CI stuff/api.txt") as file:
+with open("CI stuff/Payplus API functions/api.txt") as file:
     api = file.readline()
 
-with open("CI stuff/secret_key.txt") as file:
+with open("CI stuff/Payplus API functions/secret_key.txt") as file:
     secret = file.readline()
 
 
@@ -194,7 +194,6 @@ data2 = f"""
     }}
     """
 
-
 def add_cc():
     url = "https://restapidev.payplus.co.il/api/v1.0/Token/Add"
     data = request_change(url, data=cc_token)
@@ -209,7 +208,7 @@ def add_cc_info(card_id):
     if "card_id" not in customer_info_local:
         print("If statement")
         customer_info_local["card_id"] = card_id
-        with open("CI stuff/customer_info.json", "w") as file:
+        with open("CI stuff/Payplus API functions/customer_info.json", "w") as file:
             json.dump(customer_info_local, file, indent=4)
     else:
         print("else statement")
@@ -218,7 +217,7 @@ def add_cc_info(card_id):
             i += 1
         customer_info_local[f"card_id_{i}"] = card_id
        
-        with open("CI stuff/customer_info.json", "w") as file:
+        with open("CI stuff/Payplus API functions/customer_info.json", "w") as file:
             json.dump(customer_info_local, file, indent=4)
 
 def remove_cc(card_id):
@@ -237,10 +236,10 @@ def check_cc(card_id):
 #     request_data(url)
 
 def list():
-    url = "https://restapidev.payplus.co.il/api/v1.0/Token/List/"
+    url = "https://restapidev.payplus.co.il/api/v1.0/Token/List"
     # Needs customer uid and terminal uid
     # print(url, data2)
-    request_data(url, data2)
+    request_change(url, data2)
     
 
 # add_cc()
@@ -250,12 +249,6 @@ def list():
 # view_cc(card_id)
 # list()
 # add_cc_info()
-
-
-print("########################################################################")
-# for key in customer_info_local:
-#     print(key)
-# print(customer_info)
 
 ####################################################################################
 # Recurring transactions
