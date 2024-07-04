@@ -1,14 +1,16 @@
-# NOTE: Remove all outgoing calls in def incoming_calls 
+# TODO: Remove all outgoing calls in new def incoming_calls 
+# NOTE: All numbers are filtered by answer only 
 
 import pandas as pd
 
 # Load the CSV file
 path = r"CI stuff/"
-file = "cdr__1719988075ci.pbx.avipc.net.csv"
+file = "cdr__1720093090ci.pbx.avipc.net.csv"
 csv_file_path = f'C:/Users/Aharon/Downloads/{file}'
 df = pd.read_csv(csv_file_path)
 
-def count_number_called(df):
+# Counts how many times someone called a IL/non IL number
+def did_number_count(df):
     # Check if the 'did' column exists in the DataFrame
     if 'did' in df.columns:
         # Convert the 'did' column to string
@@ -36,7 +38,7 @@ def count_number_called(df):
 
         if not df_starts_with_972.empty:
             # Save the filtered DataFrame to a new CSV file
-            starts_with_972_csv_file_path = path + 'starts_with_972_did.csv'
+            starts_with_972_csv_file_path = path + '972_did.csv'
             df_starts_with_972.to_csv(starts_with_972_csv_file_path, index=False)
 
             print(f"The 'did' numbers starting with '972' have been saved as {starts_with_972_csv_file_path}.")
@@ -45,6 +47,7 @@ def count_number_called(df):
     else:
         print("The 'did' column does not exist in the CSV file.")
 
+# Sorts by call destination number
 def sort_number(df):
     # Check if the 'did' column exists in the DataFrame
     if 'did' in df.columns:
@@ -73,7 +76,8 @@ def sort_number(df):
     else:
         print("The 'did' column does not exist in the CSV file.")
 
-def incoming_calls(df):
+# Summarizes source calls from IL and non IL
+def answered_calls(df):
     # Check if the 'clid' column exists in the DataFrame
     if 'clid' in df.columns:
         # Convert the 'clid' column to string
@@ -110,5 +114,5 @@ def incoming_calls(df):
 
 
 # sort_number(df)
-# count_number_called(df)
-# incoming_calls(df)
+# did_number_count(df)
+# answered_calls(df)
