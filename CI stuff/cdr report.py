@@ -1,3 +1,5 @@
+# NOTE: Remove all outgoing calls in def incoming_calls 
+
 import pandas as pd
 
 # Load the CSV file
@@ -5,7 +7,6 @@ path = r"CI stuff/"
 file = "cdr__1719988075ci.pbx.avipc.net.csv"
 csv_file_path = f'C:/Users/Aharon/Downloads/{file}'
 df = pd.read_csv(csv_file_path)
-
 
 def count_number_called(df):
     # Check if the 'did' column exists in the DataFrame
@@ -60,7 +61,7 @@ def sort_number(df):
         counts = df_sorted['did'].value_counts().sort_index()
 
         # Save the sorted DataFrame to a new CSV file
-        sorted_csv_file_path = 'sorted_path_to_your_file.csv'
+        sorted_csv_file_path = path + 'sorted_path_to_your_file.csv'
         df_sorted.to_csv(sorted_csv_file_path, index=False)
 
         print(f"The sorted CSV file has been saved as {sorted_csv_file_path}.")
@@ -72,14 +73,42 @@ def sort_number(df):
     else:
         print("The 'did' column does not exist in the CSV file.")
 
+def incoming_calls(df):
+    # Check if the 'clid' column exists in the DataFrame
+    if 'clid' in df.columns:
+        # Convert the 'clid' column to string
+        df['clid'] = df['clid'].astype(str)
 
+        # Drop any rows where 'clid' is NaN (optional, depends on your data)
+        df = df.dropna(subset=['clid'])
 
+        # Remove leading non-digit characters
+        df['cleaned_clid'] = df['clid'].str.extract(r'(\d+)')
 
+        # Check if the first three digits are '972'
+        df['starts_with_972'] = df['cleaned_clid'].str[:3] == '972'
 
+        # Count how many non-null 'clid' numbers do not start with '972'
+        count_does_not_start_with_972 = df[df['cleaned_clid'].notnull() & ~df['starts_with_972']].shape[0]
 
+        # Filter the DataFrame to include only rows where starts_with_972 is True
+        df_filtered = df[df['starts_with_972']]
+
+        # Save the updated DataFrame to a new CSV file
+        updated_csv_file_path = path + 'IL_numbers.csv'
+        df_filtered.to_csv(updated_csv_file_path, index=False)
+
+        total = count_does_not_start_with_972 + df_filtered.shape[0]
+        # Print the summary of how many numbers started with '972'
+        print(f"{df_filtered.shape[0]} numbers from IL.")
+        print(f"{count_does_not_start_with_972} numbers from chul.")
+        print(f"{total} numbers total'.")
+    else:
+        print("The 'clid' column does not exist in the CSV file.")
 
 
 
 
 # sort_number(df)
 # count_number_called(df)
+# incoming_calls(df)
