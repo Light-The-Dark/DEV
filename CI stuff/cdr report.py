@@ -1,5 +1,6 @@
-# TODO: Remove all outgoing calls in new def incoming_calls 
-# NOTE: All numbers are filtered by answer only 
+# TODO: incoming_calls_only - remove all outgoing calls
+# TODO: Detailed stats. IL to IL, IL to non-IL, non-IL to non-IL, non-IL to IL
+# NOTE: All numbers are filtered by answer only.
 
 import pandas as pd
 
