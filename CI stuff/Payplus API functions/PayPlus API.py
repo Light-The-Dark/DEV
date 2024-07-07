@@ -33,23 +33,23 @@ values = """
 }
 """
 
-with open("CI stuff/Payplus API functions/customer_info.json") as file:
+with open("Payplus API functions/customer_info.json") as file:
     customer_info_local = json.load(file)
 
-with open("CI stuff/Payplus API functions/bank_info.json") as file:
+with open("Payplus API functions/bank_info.json") as file:
     bank_values = file.read()
 
-with open("CI stuff/Payplus API functions/charges_values.json") as file:
+with open("Payplus API functions/charges_values.json") as file:
     charges_values = file.read()
 
 # NOTE terminal uid is hardcoded currently in data file
-with open("CI stuff/Payplus API functions/cc_token.json", encoding="utf-8") as file:
+with open("Payplus API functions/cc_token.json", encoding="utf-8") as file:
     cc_token = file.read()
 
-with open("CI stuff/Payplus API functions/api.txt") as file:
+with open("Payplus API functions/api.txt") as file:
     api = file.readline()
 
-with open("CI stuff/Payplus API functions/secret_key.txt") as file:
+with open("Payplus API functions/secret_key.txt") as file:
     secret = file.readline()
 
 
@@ -208,7 +208,7 @@ def add_cc_info(card_id):
     if "card_id" not in customer_info_local:
         print("If statement")
         customer_info_local["card_id"] = card_id
-        with open("CI stuff/Payplus API functions/customer_info.json", "w") as file:
+        with open("Payplus API functions/customer_info.json", "w") as file:
             json.dump(customer_info_local, file, indent=4)
     else:
         print("else statement")
@@ -217,7 +217,7 @@ def add_cc_info(card_id):
             i += 1
         customer_info_local[f"card_id_{i}"] = card_id
        
-        with open("CI stuff/Payplus API functions/customer_info.json", "w") as file:
+        with open("Payplus API functions/customer_info.json", "w") as file:
             json.dump(customer_info_local, file, indent=4)
 
 def remove_cc(card_id):
@@ -316,7 +316,6 @@ terminal_uid2 = """
 """
 terminal_uid2 = terminal_uid2.replace("{uid}", terminal_uid)
 
-
 def add_recurring_payment():
     url = "https://restapidev.payplus.co.il/api/v1.0/RecurringPayments/Add"
     request_change(url, data=charges_values)
@@ -325,6 +324,18 @@ def remove_recurring_payment():
     url = "https://restapidev.payplus.co.il/api/v1.0/RecurringPayments/DeleteRecurring/" + recurring_payment_id
     request_change(url, data=terminal_uid2)
 
+def update_recurring():
+    # Requires the value 'valid' which is boolean and recurring uid which I hardcoded for testing
+    url = "https://restapidev.payplus.co.il/api/v1.0/RecurringPayments/Update/" + "d4fd070b-b90b-4c0f-9785-8fff994797fa"
+    request_change(url, data=charges_values)
+
+def view_recurring():
+    # uid is optional, presumming you want to see only a specific user.
+    url = "https://restapidev.payplus.co.il/api/v1.0/RecurringPayments/View/" + "?" + terminal_uid
+    request_data(url)
+
 
 # add_recurring_payment()
 # remove_recurring_payment()
+# update_recurring()
+view_recurring()

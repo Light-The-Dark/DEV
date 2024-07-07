@@ -5,7 +5,7 @@
 import pandas as pd
 
 # Load the CSV file
-path = r"CI stuff/"
+path = r"PBX reports"
 file = "cdr__1720093090ci.pbx.avipc.net.csv"
 csv_file_path = f'C:/Users/Aharon/Downloads/{file}'
 df = pd.read_csv(csv_file_path)
@@ -110,8 +110,6 @@ def answered_calls(df):
         print(f"{total} numbers total'.")
     else:
         print("The 'clid' column does not exist in the CSV file.")
-
-
 
 
 # sort_number(df)
