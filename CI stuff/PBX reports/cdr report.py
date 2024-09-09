@@ -6,7 +6,7 @@ import pandas as pd
 
 # Load the CSV file
 path = r"PBX reports"
-file = "cdr__1721195633ci.pbx.avipc.net.csv"
+file = "cdr__1725186486ci.pbx.avipc.net.csv"
 csv_file_path = f'C:/Users/Aharon/Downloads/{file}'
 df = pd.read_csv(csv_file_path)
 
@@ -37,14 +37,14 @@ def did_number_count(df):
         # Filter the DataFrame to include only rows where 'did' starts with '972'
         df_starts_with_972 = df[df['starts_with_972']]
 
-        if not df_starts_with_972.empty:
-            # Save the filtered DataFrame to a new CSV file
-            starts_with_972_csv_file_path = path + '972_did.csv'
-            df_starts_with_972.to_csv(starts_with_972_csv_file_path, index=False)
+        # if not df_starts_with_972.empty:
+        #     Save the filtered DataFrame to a new CSV file
+        #     starts_with_972_csv_file_path = path + '972_did.csv'
+        #     df_starts_with_972.to_csv(starts_with_972_csv_file_path, index=False)
 
-            print(f"The 'did' numbers starting with '972' have been saved as {starts_with_972_csv_file_path}.")
-        else:
-            print("No 'did' numbers found starting with '972'.")
+        #     print(f"The 'did' numbers starting with '972' have been saved as {starts_with_972_csv_file_path}.")
+        # else:
+        #     print("No 'did' numbers found starting with '972'.")
     else:
         print("The 'did' column does not exist in the CSV file.")
 
@@ -65,10 +65,10 @@ def sort_number(df):
         counts = df_sorted['did'].value_counts().sort_index()
 
         # Save the sorted DataFrame to a new CSV file
-        sorted_csv_file_path = path + 'sorted_path_to_your_file.csv'
-        df_sorted.to_csv(sorted_csv_file_path, index=False)
+        # sorted_csv_file_path = path + 'sorted_path_to_your_file.csv'
+        # df_sorted.to_csv(sorted_csv_file_path, index=False)
 
-        print(f"The sorted CSV file has been saved as {sorted_csv_file_path}.")
+        # print(f"The sorted CSV file has been saved as {sorted_csv_file_path}.")
         print("\nCounts of each number in the 'did' column:")
 
         # Format the numbers to avoid scientific notation
@@ -100,18 +100,18 @@ def answered_calls(df):
         df_filtered = df[df['starts_with_972']]
 
         # Save the updated DataFrame to a new CSV file
-        updated_csv_file_path = path + 'IL_numbers.csv'
-        df_filtered.to_csv(updated_csv_file_path, index=False)
+        # updated_csv_file_path = path + 'IL_numbers.csv'
+        # df_filtered.to_csv(updated_csv_file_path, index=False)
 
         total = count_does_not_start_with_972 + df_filtered.shape[0]
         # Print the summary of how many numbers started with '972'
         print(f"{df_filtered.shape[0]} numbers from IL.")
         print(f"{count_does_not_start_with_972} numbers from chul.")
-        print(f"{total} numbers total'.")
+        print(f"{total} numbers total.")
     else:
         print("The 'clid' column does not exist in the CSV file.")
 
 
-# sort_number(df)
-# did_number_count(df)
-# answered_calls(df)
+sort_number(df)
+did_number_count(df)
+answered_calls(df)

@@ -1,11 +1,17 @@
 import pandas as pd
 
-original = "Priority/Original.xlsx"
-converted = "Priority/converted2.xlsx"
+original = "Priority/All Israeli Sales for Import.xlsx"
+converted = "Priority/600_converted.xlsx"
 
-def split_excel_sheet(input_file, output_file, max_lines_per_sheet=49):
+def split_excel_sheet(input_file, output_file, max_lines_per_sheet=609):
     # Load the Excel file
-    df = pd.read_excel(input_file)
+    df = pd.read_excel(input_file, converters={'Date': str})
+
+    # Convert date columns to string to preserve the original format
+    for col in df.columns:
+        if pd.api.types.is_datetime64_any_dtype(df[col]):
+            df[col] = df[col].dt.strftime('%Y-%m-%d')
+
 
     # Calculate the number of sheets needed
     num_sheets = -(-len(df) // max_lines_per_sheet)  # Ceiling division

@@ -338,4 +338,19 @@ def view_recurring():
 # add_recurring_payment()
 # remove_recurring_payment()
 # update_recurring()
-view_recurring()
+# view_recurring()
+
+
+####################################################################################
+# One Time transactions
+####################################################################################
+
+with open("Payplus API functions/charge_transaction_data.json") as file:
+    charge_transaction = json.load(file)
+
+def charge():
+    url = "https://restapidev.payplus.co.il/api/v1.0/Transactions/Charge"
+    request_change(url, data=charge_transaction)
+
+# charge()
+
