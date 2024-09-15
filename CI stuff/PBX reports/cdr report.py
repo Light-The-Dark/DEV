@@ -3,10 +3,11 @@
 # NOTE: All numbers are filtered by answer only.
 
 import pandas as pd
+from datetime import time
 
 # Load the CSV file
 path = r"PBX reports"
-file = "cdr__1725186486ci.pbx.avipc.net.csv"
+file = "cdr__1726409904ci.pbx.avipc.net.csv"
 csv_file_path = f'C:/Users/Aharon/Downloads/{file}'
 df = pd.read_csv(csv_file_path)
 
@@ -112,6 +113,59 @@ def answered_calls(df):
         print("The 'clid' column does not exist in the CSV file.")
 
 
-sort_number(df)
-did_number_count(df)
-answered_calls(df)
+def sort_cs_tech(df):
+    if 'cnam' in df.columns:
+        # Convert the 'cnam' column to string
+        df['cnam'] = df['cnam'].astype(str)
+
+        # Drop any rows where 'cnam' is NaN (optional, depends on your data)
+        df = df.dropna(subset=['cnam'])
+
+        # Counts total "Tech" and "CS"
+        tech_count = df['cnam'].str.contains('Tech', case=False, na=False).sum()
+        cs_count = df['cnam'].str.contains('CS', case=False, na=False).sum()
+
+        print(f"Total Tech/CS calls: {tech_count + cs_count}")
+        print(f"Total Tech count: {tech_count}")
+        print(f"Total CS count: {cs_count}")
+
+def analyze_call_times(df):
+    # Convert 'calldate' to datetime type
+    df['calldate'] = pd.to_datetime(df['calldate'])
+    
+    # Define time ranges
+    time_ranges = {
+        'morning': (time(9, 30), time(14, 0)),
+        'afternoon': (time(14, 1), time(22, 0)),
+        'night': (time(22, 1), time(9, 29))
+    }
+
+    # Define search terms
+    search_terms = ['Tech', 'CS', 'Hebrew Tech', 'Hebrew CS']
+
+    results = {}
+
+    for term in search_terms:
+        results[term] = {range_name: 0 for range_name in time_ranges}
+
+    for range_name, (start, end) in time_ranges.items():
+        if start < end:
+            mask = (df['calldate'].dt.time >= start) & (df['calldate'].dt.time <= end)
+        else:
+            mask = (df['calldate'].dt.time >= start) | (df['calldate'].dt.time <= end)
+
+        for term in search_terms:
+            count = df[mask]['cnam'].str.contains(term, case=False, na=False).sum()
+            results[term][range_name] = count
+
+    # Print results
+    for term in search_terms:
+        print(f"\n{term} counts:")
+        for range_name, count in results[term].items():
+            print(f"  {range_name.capitalize()}: {count}")
+
+# sort_number(df)
+# did_number_count(df)
+# answered_calls(df)
+# sort_cs_tech(df)
+analyze_call_times(df)
