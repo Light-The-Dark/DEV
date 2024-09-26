@@ -7,11 +7,13 @@ from datetime import time
 
 # Load the CSV file
 path = r"PBX reports"
-file = "cdr__1726409904ci.pbx.avipc.net.csv"
+file = "cdr__1726655213ci.pbx.avipc.net.csv"
 csv_file_path = f'C:/Users/Aharon/Downloads/{file}'
+virtual_number_path = r"C:\Users\Aharon\Downloads\Virtual numbers.csv"
 df = pd.read_csv(csv_file_path)
+vn_file = pd.read_csv(virtual_number_path)
 
-# Counts how many times someone called a IL/non IL number
+# Counts how many times someone called an IL/non IL number
 def did_number_count(df):
     # Check if the 'did' column exists in the DataFrame
     if 'did' in df.columns:
@@ -32,11 +34,11 @@ def did_number_count(df):
 
         # Print the summary
         print(f"Summary:")
-        print(f"Numbers starting with '972': {count_starts_with_972}")
-        print(f"Numbers not starting with '972': {count_does_not_start_with_972}")
+        print(f"Numbers customer called starting with '972': {count_starts_with_972}")
+        print(f"Numbers customer called not starting with '972': {count_does_not_start_with_972}")
 
         # Filter the DataFrame to include only rows where 'did' starts with '972'
-        df_starts_with_972 = df[df['starts_with_972']]
+        # df_starts_with_972 = df[df['starts_with_972']]
 
         # if not df_starts_with_972.empty:
         #     Save the filtered DataFrame to a new CSV file
@@ -78,58 +80,66 @@ def sort_number(df):
     else:
         print("The 'did' column does not exist in the CSV file.")
 
-# Summarizes source calls from IL and non IL
-def answered_calls(df):
-    # Check if the 'clid' column exists in the DataFrame
-    if 'clid' in df.columns:
-        # Convert the 'clid' column to string
-        df['clid'] = df['clid'].astype(str)
-
-        # Drop any rows where 'clid' is NaN (optional, depends on your data)
-        df = df.dropna(subset=['clid'])
-
-        # Remove leading non-digit characters
-        df['cleaned_clid'] = df['clid'].str.extract(r'(\d+)')
-
-        # Check if the first three digits are '972'
-        df['starts_with_972'] = df['cleaned_clid'].str[:3] == '972'
-
-        # Count how many non-null 'clid' numbers do not start with '972'
-        count_does_not_start_with_972 = df[df['cleaned_clid'].notnull() & ~df['starts_with_972']].shape[0]
-
-        # Filter the DataFrame to include only rows where starts_with_972 is True
-        df_filtered = df[df['starts_with_972']]
-
-        # Save the updated DataFrame to a new CSV file
-        # updated_csv_file_path = path + 'IL_numbers.csv'
-        # df_filtered.to_csv(updated_csv_file_path, index=False)
-
-        total = count_does_not_start_with_972 + df_filtered.shape[0]
-        # Print the summary of how many numbers started with '972'
-        print(f"{df_filtered.shape[0]} numbers from IL.")
-        print(f"{count_does_not_start_with_972} numbers from chul.")
-        print(f"{total} numbers total.")
-    else:
+# Summarizes source calls from IL and non IL. Virtual numbers are considered IL even if non IL
+def answered_calls(df, virtual_numbers_file):
+    if 'clid' not in df.columns:
         print("The 'clid' column does not exist in the CSV file.")
+        return
 
+    # Convert the 'clid' column to string and clean it
+    df['clid'] = df['clid'].astype(str)
+    original_count = df.shape[0]
+    df = df.dropna(subset=['clid'])
+    after_dropna_count = df.shape[0]
+    
+    print(f"Original count: {original_count}")
+    print(f"Count after dropping NaN: {after_dropna_count}")
+    print(f"Dropped {original_count - after_dropna_count} NaN values")
 
-def sort_cs_tech(df):
-    if 'cnam' in df.columns:
-        # Convert the 'cnam' column to string
-        df['cnam'] = df['cnam'].astype(str)
+    df['cleaned_clid'] = df['clid'].str.extract(r'(\d+)')
+    
+    # Check if the first three digits are '972'
+    df['starts_with_972'] = df['cleaned_clid'].str[:3] == '972'
+    initial_972_count = df['starts_with_972'].sum()
+    print(f"Numbers starting with 972: {initial_972_count}")
 
-        # Drop any rows where 'cnam' is NaN (optional, depends on your data)
-        df = df.dropna(subset=['cnam'])
+    # Load additional IL numbers
+    try:
+        virtual_number_df = pd.read_csv(virtual_numbers_file)
+        virtual_numbers = set(virtual_number_df['number'].astype(str))
+        print(f"Loaded {len(virtual_numbers)} additional IL numbers")
+    except Exception as e:
+        print(f"Error loading additional IL numbers: {e}")
+        virtual_numbers = set()
 
-        # Counts total "Tech" and "CS"
-        tech_count = df['cnam'].str.contains('Tech', case=False, na=False).sum()
-        cs_count = df['cnam'].str.contains('CS', case=False, na=False).sum()
+    # Function to check if a number is in the additional IL numbers list
+    def virtual_number(number):
+        return number in virtual_numbers
 
-        print(f"Total Tech/CS calls: {tech_count + cs_count}")
-        print(f"Total Tech count: {tech_count}")
-        print(f"Total CS count: {cs_count}")
+    # Apply the check to all numbers
+    df['virtual_number'] = df['cleaned_clid'].apply(virtual_number)
+    virtual_number_count = df['virtual_number'].sum()
+    print(f"Numbers found in additional IL list: {virtual_number_count}")
 
-def analyze_call_times(df):
+    # Determine final IL status (either starts with 972 or is in the additional IL list)
+    df['final_is_il'] = df['starts_with_972'] | df['virtual_number']
+
+    # Calculate counts
+    il_count = df['final_is_il'].sum()
+    non_il_count = df.shape[0] - il_count
+
+    print("\nFinal Results:")
+    print(f"(Source call) {il_count} numbers from IL.")
+    print(f"(Source call) {non_il_count} numbers from chul.")
+    total = il_count + non_il_count
+    print(f"(Source call) {total} numbers total.")
+
+    # Additional checks
+    print(f"\nNumbers categorized as IL but not starting with 972: {il_count - initial_972_count}")
+    print(f"Numbers in additional IL list but already starting with 972: {initial_972_count + virtual_number_count - il_count}")
+
+# Splits calls based on time of day and totals Sales, CS, Tech
+def analyze_calls(df):
     # Convert 'calldate' to datetime type
     df['calldate'] = pd.to_datetime(df['calldate'])
     
@@ -141,12 +151,13 @@ def analyze_call_times(df):
     }
 
     # Define search terms
-    search_terms = ['Tech', 'CS', 'Hebrew Tech', 'Hebrew CS']
+    search_terms = ['Sales - English', 'CS - English', 'Tech - English', 'Sales - Hebrew', 'CS - Hebrew', 'Tech - Hebrew']
 
     results = {}
 
     for term in search_terms:
         results[term] = {range_name: 0 for range_name in time_ranges}
+        results[term]['total'] = 0  # Add a total for each term
 
     for range_name, (start, end) in time_ranges.items():
         if start < end:
@@ -157,6 +168,7 @@ def analyze_call_times(df):
         for term in search_terms:
             count = df[mask]['cnam'].str.contains(term, case=False, na=False).sum()
             results[term][range_name] = count
+            results[term]['total'] += count  # Add to the total
 
     # Print results
     for term in search_terms:
@@ -164,8 +176,24 @@ def analyze_call_times(df):
         for range_name, count in results[term].items():
             print(f"  {range_name.capitalize()}: {count}")
 
-# sort_number(df)
+    
+    # Calculate and print totals
+    categories = ['Sales', 'CS', 'Tech']
+    print("\n\n\n\nTotals:")
+    for category in categories:
+        english_total = results[f'{category} - English']['total']
+        hebrew_total = results[f'{category} - Hebrew']['total']
+        total = english_total + hebrew_total
+        print(f"  {category}:")
+        print(f"    English: {english_total}")
+        print(f"    Hebrew: {hebrew_total}")
+        print(f"    Total: {total}")
+   
+
+
 # did_number_count(df)
+# sort_number(df)
 # answered_calls(df)
-# sort_cs_tech(df)
-analyze_call_times(df)
+# analyze_calls(df)
+# answered_calls(df, vn_file)
+
