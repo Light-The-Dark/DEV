@@ -9,7 +9,7 @@ from datetime import time
 path = r"PBX reports"
 file = "cdr__1726655213ci.pbx.avipc.net.csv"
 csv_file_path = f'C:/Users/Aharon/Downloads/{file}'
-virtual_number_path = r"C:\Users\Aharon\Downloads\Virtual numbers.csv"
+virtual_number_path = r"C:\Users\Aharon\Downloads\Virtual_numbers.csv"
 df = pd.read_csv(csv_file_path)
 vn_file = pd.read_csv(virtual_number_path)
 
@@ -80,64 +80,6 @@ def sort_number(df):
     else:
         print("The 'did' column does not exist in the CSV file.")
 
-# Summarizes source calls from IL and non IL. Virtual numbers are considered IL even if non IL
-def answered_calls(df, virtual_numbers_file):
-    if 'clid' not in df.columns:
-        print("The 'clid' column does not exist in the CSV file.")
-        return
-
-    # Convert the 'clid' column to string and clean it
-    df['clid'] = df['clid'].astype(str)
-    original_count = df.shape[0]
-    df = df.dropna(subset=['clid'])
-    after_dropna_count = df.shape[0]
-    
-    print(f"Original count: {original_count}")
-    print(f"Count after dropping NaN: {after_dropna_count}")
-    print(f"Dropped {original_count - after_dropna_count} NaN values")
-
-    df['cleaned_clid'] = df['clid'].str.extract(r'(\d+)')
-    
-    # Check if the first three digits are '972'
-    df['starts_with_972'] = df['cleaned_clid'].str[:3] == '972'
-    initial_972_count = df['starts_with_972'].sum()
-    print(f"Numbers starting with 972: {initial_972_count}")
-
-    # Load additional IL numbers
-    try:
-        virtual_number_df = pd.read_csv(virtual_numbers_file)
-        virtual_numbers = set(virtual_number_df['number'].astype(str))
-        print(f"Loaded {len(virtual_numbers)} additional IL numbers")
-    except Exception as e:
-        print(f"Error loading additional IL numbers: {e}")
-        virtual_numbers = set()
-
-    # Function to check if a number is in the additional IL numbers list
-    def virtual_number(number):
-        return number in virtual_numbers
-
-    # Apply the check to all numbers
-    df['virtual_number'] = df['cleaned_clid'].apply(virtual_number)
-    virtual_number_count = df['virtual_number'].sum()
-    print(f"Numbers found in additional IL list: {virtual_number_count}")
-
-    # Determine final IL status (either starts with 972 or is in the additional IL list)
-    df['final_is_il'] = df['starts_with_972'] | df['virtual_number']
-
-    # Calculate counts
-    il_count = df['final_is_il'].sum()
-    non_il_count = df.shape[0] - il_count
-
-    print("\nFinal Results:")
-    print(f"(Source call) {il_count} numbers from IL.")
-    print(f"(Source call) {non_il_count} numbers from chul.")
-    total = il_count + non_il_count
-    print(f"(Source call) {total} numbers total.")
-
-    # Additional checks
-    print(f"\nNumbers categorized as IL but not starting with 972: {il_count - initial_972_count}")
-    print(f"Numbers in additional IL list but already starting with 972: {initial_972_count + virtual_number_count - il_count}")
-
 # Splits calls based on time of day and totals Sales, CS, Tech
 def analyze_calls(df):
     # Convert 'calldate' to datetime type
@@ -188,12 +130,70 @@ def analyze_calls(df):
         print(f"    English: {english_total}")
         print(f"    Hebrew: {hebrew_total}")
         print(f"    Total: {total}")
-   
+
+# Summarizes source calls from IL and non IL. Virtual numbers are considered IL even if non IL
+def answered_calls(df, virtual_numbers_file):
+    if 'clid' not in df.columns:
+        print("The 'clid' column does not exist in the CSV file.")
+        return
+
+    # Convert the 'clid' column to string and clean it
+    df['clid'] = df['clid'].astype(str)
+    original_count = df.shape[0]
+    df = df.dropna(subset=['clid'])
+    after_dropna_count = df.shape[0]
+    
+    print(f"Original count: {original_count}")
+    print(f"Count after dropping NaN: {after_dropna_count}")
+    print(f"Dropped {original_count - after_dropna_count} NaN values")
+
+    df['cleaned_clid'] = df['clid'].str.extract(r'(\d+)')
+    
+    # Check if the first three digits are '972'
+    df['starts_with_972'] = df['cleaned_clid'].str[:3] == '972'
+    initial_972_count = df['starts_with_972'].sum()
+    print(f"Numbers starting with 972: {initial_972_count}")
+
+    # Load additional IL numbers
+    try:
+        virtual_numbers = set(virtual_numbers_file['number'].astype(str))
+        print(f"Loaded {len(virtual_numbers)} additional IL numbers")
+    except Exception as e:
+        print(f"Error loading additional IL numbers: {e}")
+        virtual_numbers = set()
+
+    # Function to check if a number is in the additional IL numbers list
+    def virtual_number(number):
+        return number in virtual_numbers
+
+    # Apply the check to all numbers
+    df['virtual_number'] = df['cleaned_clid'].apply(virtual_number)
+    virtual_number_count = df['virtual_number'].sum()
+    print(f"Numbers found in additional IL list: {virtual_number_count}")
+
+    # Determine final IL status (either starts with 972 or is in the additional IL list)
+    df['final_is_il'] = df['starts_with_972'] | df['virtual_number']
+
+    # Calculate counts
+    il_count = df['final_is_il'].sum()
+    non_il_count = df.shape[0] - il_count
+
+    print("\nFinal Results:")
+    print(f"(Source call) {il_count} numbers from IL.")
+    print(f"(Source call) {non_il_count} numbers from chul.")
+    total = il_count + non_il_count
+    print(f"(Source call) {total} numbers total.")
+
+    # Additional checks
+    print(f"\nNumbers categorized as IL but not starting with 972: {il_count - initial_972_count}")
+    print(f"Numbers in additional IL list but already starting with 972: {initial_972_count + virtual_number_count - il_count}")
+
+ 
 
 
 # did_number_count(df)
 # sort_number(df)
 # answered_calls(df)
 # analyze_calls(df)
-# answered_calls(df, vn_file)
+answered_calls(df, vn_file)
 
