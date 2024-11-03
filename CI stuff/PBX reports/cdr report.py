@@ -1,4 +1,3 @@
-# TODO: incoming_calls_only - remove all outgoing calls
 # TODO: Detailed stats. IL to IL, IL to non-IL, non-IL to non-IL, non-IL to IL
 # NOTE: All numbers are filtered by answer only.
 
@@ -7,14 +6,16 @@ from datetime import time
 
 # Load the CSV file
 path = r"PBX reports"
-file = "cdr__1726655213ci.pbx.avipc.net.csv"
+file = "cdr__1730611959ci.pbx.avipc.net.csv"
 csv_file_path = f'C:/Users/Aharon/Downloads/{file}'
-virtual_number_path = r"C:\Users\Aharon\Downloads\Virtual_numbers.csv"
+virtual_number_path = r"C:\Users\Aharon\Downloads\Virtual numbers.csv"
 df = pd.read_csv(csv_file_path)
 vn_file = pd.read_csv(virtual_number_path)
 
 # Counts how many times someone called an IL/non IL number
 def did_number_count(df):
+    print("\n\n########################################################\nDID NUMBER COUNT")
+    print("How many times we received a phone call to one of our IL/non IL numbers\n\n")
     # Check if the 'did' column exists in the DataFrame
     if 'did' in df.columns:
         # Convert the 'did' column to string
@@ -53,6 +54,8 @@ def did_number_count(df):
 
 # Sorts by call destination number
 def sort_number(df):
+    print("\n\n########################################################\nSORT NUMBER")
+    print("Sorts numbers by which number the customer called\n\n")
     # Check if the 'did' column exists in the DataFrame
     if 'did' in df.columns:
         # Convert the 'did' column to numeric if necessary
@@ -66,12 +69,6 @@ def sort_number(df):
 
         # Count the occurrences of each number in the 'did' column
         counts = df_sorted['did'].value_counts().sort_index()
-
-        # Save the sorted DataFrame to a new CSV file
-        # sorted_csv_file_path = path + 'sorted_path_to_your_file.csv'
-        # df_sorted.to_csv(sorted_csv_file_path, index=False)
-
-        # print(f"The sorted CSV file has been saved as {sorted_csv_file_path}.")
         print("\nCounts of each number in the 'did' column:")
 
         # Format the numbers to avoid scientific notation
@@ -82,6 +79,8 @@ def sort_number(df):
 
 # Splits calls based on time of day and totals Sales, CS, Tech
 def analyze_calls(df):
+    print("\n\n########################################################\nANALYZE CALLS")
+    print("Analyze the time calls were made and to which department\n\n")
     # Convert 'calldate' to datetime type
     df['calldate'] = pd.to_datetime(df['calldate'])
     
@@ -133,6 +132,9 @@ def analyze_calls(df):
 
 # Summarizes source calls from IL and non IL. Virtual numbers are considered IL even if non IL
 def answered_calls(df, virtual_numbers_file):
+
+    print("\n\n########################################################\nANSWERED CALLS")
+    print("Summary of calls that were made from IL/non IL. VN's are considered IL even if not starting with 972\n\n")
     if 'clid' not in df.columns:
         print("The 'clid' column does not exist in the CSV file.")
         return
@@ -142,10 +144,6 @@ def answered_calls(df, virtual_numbers_file):
     original_count = df.shape[0]
     df = df.dropna(subset=['clid'])
     after_dropna_count = df.shape[0]
-    
-    print(f"Original count: {original_count}")
-    print(f"Count after dropping NaN: {after_dropna_count}")
-    print(f"Dropped {original_count - after_dropna_count} NaN values")
 
     df['cleaned_clid'] = df['clid'].str.extract(r'(\d+)')
     
@@ -157,19 +155,18 @@ def answered_calls(df, virtual_numbers_file):
     # Load additional IL numbers
     try:
         virtual_numbers = set(virtual_numbers_file['number'].astype(str))
-        print(f"Loaded {len(virtual_numbers)} additional IL numbers")
+        print(f"Loaded {len(virtual_numbers)} virtual numbers")
     except Exception as e:
-        print(f"Error loading additional IL numbers: {e}")
+        print(f"Error loading virtual numbers: {e}")
         virtual_numbers = set()
 
     # Function to check if a number is in the additional IL numbers list
     def virtual_number(number):
         return number in virtual_numbers
-
     # Apply the check to all numbers
     df['virtual_number'] = df['cleaned_clid'].apply(virtual_number)
     virtual_number_count = df['virtual_number'].sum()
-    print(f"Numbers found in additional IL list: {virtual_number_count}")
+    print(f"Numbers found in virtual number list: {virtual_number_count}")
 
     # Determine final IL status (either starts with 972 or is in the additional IL list)
     df['final_is_il'] = df['starts_with_972'] | df['virtual_number']
@@ -184,16 +181,9 @@ def answered_calls(df, virtual_numbers_file):
     total = il_count + non_il_count
     print(f"(Source call) {total} numbers total.")
 
-    # Additional checks
-    print(f"\nNumbers categorized as IL but not starting with 972: {il_count - initial_972_count}")
-    print(f"Numbers in additional IL list but already starting with 972: {initial_972_count + virtual_number_count - il_count}")
-
- 
 
 
-# did_number_count(df)
-# sort_number(df)
-# answered_calls(df)
-# analyze_calls(df)
+did_number_count(df)
+sort_number(df)
+analyze_calls(df)
 answered_calls(df, vn_file)
-
