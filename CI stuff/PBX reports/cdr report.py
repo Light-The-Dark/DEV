@@ -6,7 +6,7 @@ from datetime import time
 
 # Load the CSV file
 path = r"PBX reports"
-file = "cdr__1730611959ci.pbx.avipc.net.csv"
+file = "cdr__1733128497ci.pbx.avipc.net.csv"
 csv_file_path = f'C:/Users/Aharon/Downloads/{file}'
 virtual_number_path = r"C:\Users\Aharon\Downloads\Virtual numbers.csv"
 df = pd.read_csv(csv_file_path)
@@ -38,17 +38,6 @@ def did_number_count(df):
         print(f"Numbers customer called starting with '972': {count_starts_with_972}")
         print(f"Numbers customer called not starting with '972': {count_does_not_start_with_972}")
 
-        # Filter the DataFrame to include only rows where 'did' starts with '972'
-        # df_starts_with_972 = df[df['starts_with_972']]
-
-        # if not df_starts_with_972.empty:
-        #     Save the filtered DataFrame to a new CSV file
-        #     starts_with_972_csv_file_path = path + '972_did.csv'
-        #     df_starts_with_972.to_csv(starts_with_972_csv_file_path, index=False)
-
-        #     print(f"The 'did' numbers starting with '972' have been saved as {starts_with_972_csv_file_path}.")
-        # else:
-        #     print("No 'did' numbers found starting with '972'.")
     else:
         print("The 'did' column does not exist in the CSV file.")
 
@@ -176,10 +165,10 @@ def answered_calls(df, virtual_numbers_file):
     non_il_count = df.shape[0] - il_count
 
     print("\nFinal Results:")
-    print(f"(Source call) {il_count} numbers from IL.")
-    print(f"(Source call) {non_il_count} numbers from chul.")
+    print(f"(Source call) {il_count} calls from IL.")
+    print(f"(Source call) {non_il_count} calls from chul.")
     total = il_count + non_il_count
-    print(f"(Source call) {total} numbers total.")
+    print(f"(Source call) {total} calls total.")
 
 
 
